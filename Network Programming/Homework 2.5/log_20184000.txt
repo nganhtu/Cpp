@@ -1,0 +1,8 @@
+[Wed Apr 07 23:45:29 2021] $ 1 $ tungbt $ -ERR
+[Wed Apr 07 23:45:33 2021] $ 1 $ binhnv $ +OK
+[Wed Apr 07 23:45:35 2021] $ 1 $ admin $ -ERR
+[Wed Apr 07 23:45:40 2021] $ 2 $ Hello World! $ +OK
+[Wed Apr 07 23:45:42 2021] $ 3 $  $ +OK
+[Wed Apr 07 23:45:45 2021] $ 2 $ Bye bye $ -ERR
+[Wed Apr 07 23:45:48 2021] $ 3 $  $ -ERR
+[Wed Apr 07 23:45:50 2021] $ 4 $  $ +OK
