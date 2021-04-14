@@ -1,13 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
+// Sửa chương trình server chấp nhận và trao đổi dữ liệu với client khác sau khi client đầu tiên ngắt kết nối
+
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#include "winsock2.h"
+#include "ws2tcpip.h"
+#define SERVER_PORT 5500
 #define SERVER_ADDR "127.0.0.1"
 #define BUFF_SIZE 2048
 #pragma comment(lib, "Ws2_32.lib")
 
-int main(int argc, char *argv[])
+int main()
 {
     // Step 1: Initiate WinSock
     WSADATA wsaData;
@@ -20,31 +23,17 @@ int main(int argc, char *argv[])
 
     // Step 2: Construct socket
     SOCKET listenSock;
-    unsigned long ul = 1;
     listenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenSock == INVALID_SOCKET)
     {
-        printf("Error %d: Cannot create server socket.", WSAGetLastError());
-        return 0;
-    }
-
-    if (ioctlsocket(listenSock, FIONBIO, (unsigned long *)&ul))
-    {
-        printf("Error! Cannot change to non-blocking mode.");
+        printf("Error %d: cannot create server socket.\n", WSAGetLastError());
         return 0;
     }
 
     // Step 3: Bind address to socket
-    if (argc != 2)
-    {
-        printf("Arguments are invalid.\n");
-        return 0;
-    }
-    int svPort = atoi(argv[1]);
-
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(svPort);
+    serverAddr.sin_port = htons(SERVER_PORT);
     inet_pton(AF_INET, SERVER_ADDR, &serverAddr.sin_addr);
     if (bind(listenSock, (sockaddr *)&serverAddr, sizeof(serverAddr)))
     {
@@ -68,20 +57,17 @@ int main(int argc, char *argv[])
     while (1)
     {
         // accept request
-        while (1)
+        connSock = accept(listenSock, (sockaddr *)&clientAddr, &clientAddrLen);
+        if (connSock == SOCKET_ERROR)
         {
-            connSock = accept(listenSock, (sockaddr *)&clientAddr, &clientAddrLen);
-            if (connSock == SOCKET_ERROR)
-            {
-                printf("Error %d: cannot permit incoming connection.\n", WSAGetLastError());
-            }
-            else
-            {
-                inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, sizeof(clientIP));
-                clientPort = ntohs(clientAddr.sin_port);
-                printf("Accept incoming connection from %s:%d.\n", clientIP, clientPort);
-                break;
-            }
+            printf("Error %d: cannot permit incoming connection.\n", WSAGetLastError());
+            return 0;
+        }
+        else
+        {
+            inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, sizeof(clientIP));
+            clientPort = ntohs(clientAddr.sin_port);
+            printf("Accept incoming connection from %s:%d.\n", clientIP, clientPort);
         }
 
         while (1)
@@ -95,22 +81,19 @@ int main(int argc, char *argv[])
             }
             else
             {
-
                 buff[ret] = 0;
                 printf("Receive from client [%s:%d]: %s\n", clientIP, clientPort, buff);
 
-                if (_stricmp(buff, "") == 0)
-                {
-                    printf("Disconnect to %s:%d.\n", clientIP, clientPort);
-                    closesocket(connSock);
-                    break;
-                }
-
-                // Send message to client
                 ret = send(connSock, buff, strlen(buff), 0);
                 if (ret == SOCKET_ERROR)
                 {
                     printf("Error %d: cannot send data.\n", WSAGetLastError());
+                    break;
+                }
+
+                if (strcasecmp(buff, "") == 0)
+                {
+                    closesocket(connSock);
                     break;
                 }
             }
