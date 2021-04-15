@@ -100,11 +100,11 @@ void login()
                 if (strcmp((const char *)nameTmp, (const char *)name) == 0)
                 {
                     accExist = true;
-                    if (active == '0')
+                    if (active == '1')
                     {
                         printf("Cannot log in. Account is locked.\n");
                     }
-                    else if (active == '1')
+                    else if (active == '0')
                     {
                         printf("Successfully logged in to account %s.\n", nameTmp);
                         strcpy_s(username, USERNAME_SIZE, nameTmp);

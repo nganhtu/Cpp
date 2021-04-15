@@ -54,11 +54,11 @@ int main(int argc, char *argv[])
     do
     {
         listenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-        if (listenSock = INVALID_SOCKET)
+        if (listenSock == INVALID_SOCKET)
         {
             printf("Error %d: cannot create server socket.\n", WSAGetLastError());
         }
-    } while (listenSock = INVALID_SOCKET);
+    } while (listenSock == INVALID_SOCKET);
 
     // Step 3: Bind address to socket
     if (argc != 2)
