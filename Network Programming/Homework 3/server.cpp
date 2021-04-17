@@ -17,66 +17,6 @@ typedef struct Session
     bool isLoggedIn;
 } Session;
 
-/* echoThread - Thread to receive the message from client and echo*/
-unsigned __stdcall echoThread(void *param)
-{
-    char buff[BUFF_SIZE];
-    int ret;
-
-    SOCKET connectedSocket = (SOCKET)param;
-    while (1)
-    {
-        // Receive message from client
-        ret = recv(connectedSocket, buff, BUFF_SIZE, 0);
-        if (ret == SOCKET_ERROR)
-        {
-            printf("Error %d: Cannot receive data.\n", WSAGetLastError());
-            break;
-        }
-        else if (ret == 0)
-        {
-            printf("Client disconnects.\n");
-            break;
-        }
-        else if (strlen(buff) > 0)
-        {
-            buff[ret] = 0;
-
-            sockaddr_in clientAddr;
-            int clientAddrLen = sizeof(clientAddr);
-            if (getpeername(connectedSocket, (sockaddr *)&clientAddr, &clientAddrLen) == SOCKET_ERROR)
-            {
-                printf("Error %d: cannot get socket name.\n", WSAGetLastError());
-            }
-            else
-            {
-                char clientIP[INET_ADDRSTRLEN];
-                inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, sizeof(clientIP));
-                int clientPort = ntohs(clientAddr.sin_port);
-                printf("Receive from client [%s:%d]: %s\n", clientIP, clientPort, buff);
-
-                if (_stricmp(buff, "") == 0)
-                {
-                    printf("Disconnect to %s:%d.\n", clientIP, clientPort);
-                    break;
-                }
-                else
-                {
-                    //Echo to client
-                    ret = send(connectedSocket, buff, strlen(buff), 0);
-                    if (ret == SOCKET_ERROR)
-                    {
-                        printf("Error %d: Cannot send data.\n", WSAGetLastError());
-                    }
-                }
-            }
-        }
-    }
-
-    closesocket(connectedSocket);
-    return 0;
-}
-
 /* handleRequestThread - Thread to receive the request from client and handle */
 unsigned __stdcall handleRequestThread(void *param)
 {
