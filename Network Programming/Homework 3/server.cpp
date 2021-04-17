@@ -204,12 +204,43 @@ unsigned __stdcall handleRequestThread(void *param)
                 }
             }
             else if (strcmp(mode, "POST") == 0)
+            /**
+             * POST request return code:
+             * 
+             * 20:  success
+             * 211: not logged in
+             */
             {
-                printf("POST!\n");
+                if (!sess.isLoggedIn)
+                {
+                    strcpy_s(buff, BUFF_SIZE, "211");
+                }
+                else
+                {
+                    char inputMessage[BUFF_SIZE] = "";
+                    memcpy_s(inputMessage, BUFF_SIZE, &buff[5], strlen(buff) - 5);
+                    printf("Message from client [%s:%d]: %s\n", sess.clientIP, sess.clientPort, inputMessage);
+                    strcpy_s(buff, BUFF_SIZE, "20");
+                }
             }
             else if (strcmp(mode, "QUIT") == 0)
+            /**
+             * QUIT request return code:
+             * 
+             * 30:  success
+             * 311: not logged in
+             */
             {
-                printf("QUIT!\n");
+                if (!sess.isLoggedIn)
+                {
+                    strcpy_s(buff, BUFF_SIZE, "311");
+                }
+                else
+                {
+                    strcpy_s(buff, BUFF_SIZE, "30");
+                    strcpy_s(sess.username, BUFF_SIZE, "");
+                    sess.isLoggedIn = false;
+                }
             }
             else
             {
