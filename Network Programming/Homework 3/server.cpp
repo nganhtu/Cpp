@@ -135,6 +135,7 @@ unsigned __stdcall handleRequestThread(void *param)
             if (strcmp(mode, "USER") == 0)
             /**
              * USER request return code:
+             * 
              * 10:  success
              * 111: logged in already
              * 112: username doesn't exist
