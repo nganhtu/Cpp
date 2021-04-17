@@ -110,7 +110,8 @@ unsigned __stdcall handleRequestThread(void *param)
             if (WSAGetLastError() == WSAECONNRESET)
             {
                 printf("Connection [%s:%d] reset by peer.\n", sess.clientIP, sess.clientPort);
-                // TODO update session
+                strcpy_s(sess.username, BUFF_SIZE, "");
+                sess.isLoggedIn = false;
             }
             else
             {
