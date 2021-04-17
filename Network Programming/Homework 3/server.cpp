@@ -14,7 +14,7 @@ typedef struct Session
     char *clientIP;
     int clientPort;
     char *username;
-    bool isLogged;
+    bool isLoggedIn;
 } Session;
 
 /* echoThread - Thread to receive the message from client and echo*/
@@ -77,6 +77,7 @@ unsigned __stdcall echoThread(void *param)
     return 0;
 }
 
+/* handleRequestThread - Thread to receive the request from client and handle */
 unsigned __stdcall handleRequestThread(void *param)
 {
     char buff[BUFF_SIZE];
