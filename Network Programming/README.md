@@ -1,4 +1,4 @@
-# Notes for programming WinSock by Visual Studio Code
+# Notes for WinSock programming WinSock by Visual Studio Code
 
 ## Difference between Visual Studio Code and Visual Studio 2015
 
