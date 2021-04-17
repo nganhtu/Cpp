@@ -110,6 +110,7 @@ unsigned __stdcall handleRequestThread(void *param)
             if (WSAGetLastError() == WSAECONNRESET)
             {
                 printf("Connection [%s:%d] reset by peer.\n", sess.clientIP, sess.clientPort);
+                // TODO update session
             }
             else
             {
@@ -132,8 +133,74 @@ unsigned __stdcall handleRequestThread(void *param)
             memcpy_s(mode, 5, &buff[0], 4);
             mode[4] = 0;
             if (strcmp(mode, "USER") == 0)
+            /**
+             * USER request return code:
+             * 10:  success
+             * 111: logged in already
+             * 112: username doesn't exist
+             * 113: account is being locked
+             */
             {
-                printf("USER!\n");
+                if (sess.isLoggedIn)
+                {
+                    strcpy_s(buff, BUFF_SIZE, "111");
+                }
+                else
+                {
+                    char inputUsername[BUFF_SIZE] = "";
+                    memcpy_s(inputUsername, BUFF_SIZE, &buff[5], strlen(buff) - 5);
+
+                    FILE *accPtr = fopen("account.txt", "r");
+                    if (accPtr == NULL)
+                    {
+                        printf("Cannot open database file. Error code: %d.\n", errno);
+                        break;
+                    }
+                    else
+                    {
+                        char accTrack[BUFF_SIZE] = "";
+                        bool accExist = false;
+                        while (fgets(accTrack, BUFF_SIZE, accPtr) != NULL)
+                        {
+                            int spacePos = 0;
+                            while (spacePos < strlen(accTrack))
+                            {
+                                if (accTrack[spacePos] != ' ')
+                                {
+                                    ++spacePos;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            char active, nameTmp[BUFF_SIZE] = "";
+                            memcpy_s(nameTmp, BUFF_SIZE, accTrack, spacePos);
+                            nameTmp[spacePos] = 0;
+                            active = accTrack[spacePos + 1];
+                            if (strcmp(nameTmp, inputUsername) == 0)
+                            {
+                                accExist = true;
+                                if (active == '1')
+                                {
+                                    strcpy_s(buff, BUFF_SIZE, "113");
+                                }
+                                else if (active == '0')
+                                {
+                                    strcpy_s(buff, BUFF_SIZE, "10");
+                                    sess.isLoggedIn = true;
+                                    strcpy_s(sess.username, BUFF_SIZE, inputUsername);
+                                }
+                                break;
+                            }
+                        }
+                        if (!sess.isLoggedIn && !accExist)
+                        {
+                            strcpy_s(buff, BUFF_SIZE, "112");
+                        }
+                    }
+                    fclose(accPtr);
+                }
             }
             else if (strcmp(mode, "POST") == 0)
             {
