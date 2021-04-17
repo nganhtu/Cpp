@@ -30,7 +30,7 @@ void sendPostRequest(SOCKET client)
     char buff[BUFF_SIZE] = "", message[BUFF_SIZE] = "";
     strcat_s(buff, BUFF_SIZE, "POST ");
     printf("Enter message to post: ");
-    fgets(message, 1024, stdin);
+    fgets(message, BUFF_SIZE, stdin);
     message[strlen(message) - 1] = '\0';
     fflush(stdin);
     strcat_s(buff, BUFF_SIZE, message);
@@ -56,7 +56,48 @@ void sendLogoutRequest(SOCKET client)
     }
 }
 
-void resolveServerResponse(SOCKET client) {}
+void handleServerResponse(SOCKET client, char *serverResponse)
+{
+    if (strcmp(serverResponse, "100") == 0)
+    {
+        printf("Log in successfully.\n");
+    }
+    else if (strcmp(serverResponse, "111") == 0)
+    {
+        printf("Error: you are logged in already.\n");
+    }
+    else if (strcmp(serverResponse, "112") == 0)
+    {
+        printf("Error: username doesn't exist.\n");
+    }
+    else if (strcmp(serverResponse, "113") == 0)
+    {
+        printf("Error: account is being locked.\n");
+    }
+    else if (strcmp(serverResponse, "200") == 0)
+    {
+        printf("Post message successfully.\n");
+    }
+    else if (strcmp(serverResponse, "211") == 0)
+    {
+        printf("Error: you are currently not logged in.\n");
+    }
+    else if (strcmp(serverResponse, "300") == 0)
+    {
+        printf("Logout succesfully.\n");
+    }
+    else if (strcmp(serverResponse, "311") == 0)
+    {
+        printf("Error: you are currently not logged in.\n");
+    }
+    else
+    {
+        printf("Unexpected return code from server: %s\n", serverResponse);
+        closesocket(client);
+        WSACleanup();
+        exit(0);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -140,19 +181,6 @@ int main(int argc, char *argv[])
             break;
         }
 
-        /*
-        // Send message
-        printf("Send to server: ");
-        fgets(buff, BUFF_SIZE, stdin);
-        buff[strlen(buff) - 1] = 0; // fgets() identifies '\n' is the last character
-
-        ret = send(client, buff, strlen(buff), 0);
-        if (ret != SOCKET_ERROR && strlen(buff) == 0)
-        {
-            break;
-        }
-        */
-
         // Receive message
         ret = recv(client, buff, BUFF_SIZE, 0);
 
@@ -170,8 +198,7 @@ int main(int argc, char *argv[])
         else
         {
             buff[ret] = 0;
-            printf("Receive from server: %s\n", buff);
-            resolveServerResponse(client);
+            handleServerResponse(client, buff);
         }
     }
 

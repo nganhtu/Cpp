@@ -137,7 +137,7 @@ unsigned __stdcall handleRequestThread(void *param)
             /**
              * USER request return code:
              * 
-             * 10:  success
+             * 100: success
              * 111: logged in already
              * 112: username doesn't exist
              * 113: account is being locked
@@ -189,7 +189,7 @@ unsigned __stdcall handleRequestThread(void *param)
                                 }
                                 else if (active == '0')
                                 {
-                                    strcpy_s(buff, BUFF_SIZE, "10");
+                                    strcpy_s(buff, BUFF_SIZE, "100");
                                     sess.isLoggedIn = true;
                                     strcpy_s(sess.username, BUFF_SIZE, inputUsername);
                                 }
@@ -208,7 +208,7 @@ unsigned __stdcall handleRequestThread(void *param)
             /**
              * POST request return code:
              * 
-             * 20:  success
+             * 200: success
              * 211: not logged in
              */
             {
@@ -220,14 +220,14 @@ unsigned __stdcall handleRequestThread(void *param)
                 {
                     char inputMessage[BUFF_SIZE] = "";
                     memcpy_s(inputMessage, BUFF_SIZE, &buff[5], strlen(buff) - 5);
-                    strcpy_s(buff, BUFF_SIZE, "20");
+                    strcpy_s(buff, BUFF_SIZE, "200");
                 }
             }
             else if (strcmp(mode, "QUIT") == 0)
             /**
              * QUIT request return code:
              * 
-             * 30:  success
+             * 300: success
              * 311: not logged in
              */
             {
@@ -237,7 +237,7 @@ unsigned __stdcall handleRequestThread(void *param)
                 }
                 else
                 {
-                    strcpy_s(buff, BUFF_SIZE, "30");
+                    strcpy_s(buff, BUFF_SIZE, "300");
                     strcpy_s(sess.username, BUFF_SIZE, "");
                     sess.isLoggedIn = false;
                 }
@@ -253,10 +253,6 @@ unsigned __stdcall handleRequestThread(void *param)
             if (ret == SOCKET_ERROR)
             {
                 printf("Error %d: Cannot send data.\n", WSAGetLastError());
-            }
-            else if (strcmp(buff, "30") == 0)
-            {
-                break;
             }
         }
     }
