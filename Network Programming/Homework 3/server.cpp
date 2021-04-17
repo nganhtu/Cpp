@@ -28,10 +28,9 @@ void recordToLog(const char *clientIP, int clientPort, const char *message, cons
     else
     {
         time_t currTime;
-        time(&currTime);
         char timeStr[100];
-        strcpy_s(timeStr, 100, ctime(&currTime));
-        timeStr[strlen(timeStr) - 1] = '\0';
+        currTime = time(0);
+        strftime(timeStr, 100, "%d/%m/%Y %H:%M:%S", localtime(&currTime));
 
         fputs(clientIP, logPtr);
         fputs(":", logPtr);

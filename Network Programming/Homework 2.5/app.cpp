@@ -18,10 +18,15 @@ void recordToLog(const char *mode, const char *message, bool success)
     else
     {
         time_t currTime;
+        /*
         time(&currTime);
         char timeStr[100];
         strcpy_s(timeStr, 100, ctime(&currTime));
         timeStr[strlen(timeStr) - 1] = '\0';
+        */
+        char timeStr[100];
+        currTime = time(0);
+        strftime(timeStr, 100, "%d/%m/%Y %H:%M:%S", localtime(&currTime));
 
         fputs("[", logPtr);
         fputs((const char *)timeStr, logPtr);
