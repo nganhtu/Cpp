@@ -125,7 +125,6 @@ unsigned __stdcall handleRequestThread(void *param)
         else
         {
             buff[ret] = 0;
-
             printf("Receive from client [%s:%d]: %s\n", sess.clientIP, sess.clientPort, buff);
 
             //Echo to client
