@@ -219,7 +219,6 @@ unsigned __stdcall handleRequestThread(void *param)
                 {
                     char inputMessage[BUFF_SIZE] = "";
                     memcpy_s(inputMessage, BUFF_SIZE, &buff[5], strlen(buff) - 5);
-                    printf("Message from client [%s:%d]: %s\n", sess.clientIP, sess.clientPort, inputMessage);
                     strcpy_s(buff, BUFF_SIZE, "20");
                 }
             }
@@ -254,8 +253,13 @@ unsigned __stdcall handleRequestThread(void *param)
             {
                 printf("Error %d: Cannot send data.\n", WSAGetLastError());
             }
+            else if (strcmp(buff, "30") == 0)
+            {
+                break;
+            }
         }
     }
+    printf("Disconnect to client [%s:%d].\n", sess.clientIP, sess.clientPort);
     closesocket(sess.connectedSocket);
     return 0;
 }
