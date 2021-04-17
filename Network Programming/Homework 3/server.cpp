@@ -94,7 +94,6 @@ unsigned __stdcall handleRequestThread(void *param)
     else
     {
         inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, sizeof(clientIP));
-        printf("clientIP = %s\n", clientIP);
         clientPort = ntohs(clientAddr.sin_port);
     }
 
@@ -128,7 +127,29 @@ unsigned __stdcall handleRequestThread(void *param)
             buff[ret] = 0;
             printf("Receive from client [%s:%d]: %s\n", sess.clientIP, sess.clientPort, buff);
 
-            //Echo to client
+            // Resolve request
+            char mode[5];
+            memcpy_s(mode, 5, &buff[0], 4);
+            mode[4] = 0;
+            if (strcmp(mode, "USER") == 0)
+            {
+                printf("USER!\n");
+            }
+            else if (strcmp(mode, "POST") == 0)
+            {
+                printf("POST!\n");
+            }
+            else if (strcmp(mode, "QUIT") == 0)
+            {
+                printf("QUIT!\n");
+            }
+            else
+            {
+                printf("Unexpected mode.\n");
+                break;
+            }
+
+            // Echo to client
             ret = send(sess.connectedSocket, buff, strlen(buff), 0);
             if (ret == SOCKET_ERROR)
             {
