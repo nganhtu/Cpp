@@ -97,6 +97,7 @@ unsigned __stdcall handleRequestThread(void *param)
         clientPort = ntohs(clientAddr.sin_port);
     }
 
+    // Create session
     char username[BUFF_SIZE] = "";
     Session sess = {(SOCKET)param, clientIP, clientPort, username, false};
 
