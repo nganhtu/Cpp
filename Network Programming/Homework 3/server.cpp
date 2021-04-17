@@ -4,6 +4,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <process.h>
+#include <time.h>
 #define SERVER_ADDR "127.0.0.1"
 #define BUFF_SIZE 2048
 #pragma comment(lib, "Ws2_32.lib")
@@ -16,6 +17,36 @@ typedef struct Session
     char *username;
     bool isLoggedIn;
 } Session;
+
+void recordToLog(const char *clientIP, int clientPort, const char *message, const char *returnCode)
+{
+    FILE *logPtr = fopen("log_20184000.txt", "a");
+    if (logPtr == NULL)
+    {
+        printf("Cannot open log file. Error code: %d\n", errno);
+    }
+    else
+    {
+        time_t currTime;
+        time(&currTime);
+        char timeStr[100];
+        strcpy_s(timeStr, 100, ctime(&currTime));
+        timeStr[strlen(timeStr) - 1] = '\0';
+
+        fputs(clientIP, logPtr);
+        fputs(":", logPtr);
+        char buffTmp[BUFF_SIZE];
+        fputs(itoa(clientPort, buffTmp, 10), logPtr);
+        fputs(" [", logPtr);
+        fputs((const char *)timeStr, logPtr);
+        fputs("] $ ", logPtr);
+        fputs(message, logPtr);
+        fputs(" $ ", logPtr);
+        fputs(returnCode, logPtr);
+        fputs("\n", logPtr);
+    }
+    fclose(logPtr);
+}
 
 /* handleRequestThread - Thread to receive the request from client and handle */
 unsigned __stdcall handleRequestThread(void *param)
@@ -68,6 +99,8 @@ unsigned __stdcall handleRequestThread(void *param)
         {
             buff[ret] = 0;
             printf("Receive from client [%s:%d]: %s\n", sess.clientIP, sess.clientPort, buff);
+            char clientRequest[BUFF_SIZE];
+            strcpy_s(clientRequest, BUFF_SIZE, buff);
 
             // Resolve request
             char mode[5];
@@ -194,6 +227,7 @@ unsigned __stdcall handleRequestThread(void *param)
             {
                 printf("Error %d: Cannot send data.\n", WSAGetLastError());
             }
+            recordToLog(sess.clientIP, sess.clientPort, clientRequest, buff);
         }
     }
     printf("Disconnect to client [%s:%d].\n", sess.clientIP, sess.clientPort);
