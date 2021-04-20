@@ -4,7 +4,44 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #define BUFF_SIZE 2048
+#define MAX_MESS_SIZE 204800
+#define DELIMITER "\r\n"
 #pragma comment(lib, "Ws2_32.lib")
+
+void sendRequestWithDelimiter(SOCKET client, const char *originalMessage)
+{
+    char message[MAX_MESS_SIZE];
+    strcpy_s(message, MAX_MESS_SIZE, originalMessage);
+    strcat_s(message, MAX_MESS_SIZE, DELIMITER);
+
+    // Send message
+    char buff[BUFF_SIZE];
+    strcpy_s(buff, BUFF_SIZE, "");
+    int cnt = (int)strlen(message) / (BUFF_SIZE - 2), currSplit = 0;
+    while (cnt--)
+    {
+        char buff[BUFF_SIZE];
+        memcpy_s(buff, BUFF_SIZE, &message[currSplit], BUFF_SIZE - 2);
+        buff[BUFF_SIZE - 2] = '\0';
+        int ret = send(client, buff, strlen(buff), 0);
+        if (ret == SOCKET_ERROR)
+        {
+            printf("Error %d: cannot send request.\n", WSAGetLastError());
+        }
+        currSplit += BUFF_SIZE - 2;
+    }
+    if (message[currSplit] != '\0')
+    {
+        char buff[BUFF_SIZE];
+        memcpy_s(buff, BUFF_SIZE, &message[currSplit], strlen(message) - currSplit);
+        buff[strlen(message) - currSplit] = '\0';
+        int ret = send(client, buff, strlen(buff), 0);
+        if (ret == SOCKET_ERROR)
+        {
+            printf("Error %d: cannot send request.\n", WSAGetLastError());
+        }
+    }
+}
 
 void sendLoginRequest(SOCKET client)
 {
@@ -17,30 +54,21 @@ void sendLoginRequest(SOCKET client)
     strcat_s(buff, BUFF_SIZE, username);
 
     // Send message
-    int ret = send(client, buff, strlen(buff), 0);
-    if (ret == SOCKET_ERROR)
-    {
-        printf("Error %d: cannot send request.\n", WSAGetLastError());
-    }
+    sendRequestWithDelimiter(client, buff);
 }
 
 void sendPostRequest(SOCKET client)
 {
     // Create message
-    char buff[BUFF_SIZE] = "", message[BUFF_SIZE] = "";
+    char buff[BUFF_SIZE] = "", message[MAX_MESS_SIZE] = "";
     strcat_s(buff, BUFF_SIZE, "POST ");
     printf("Enter message to post: ");
-    fgets(message, BUFF_SIZE, stdin);
-    message[strlen(message) - 1] = '\0';
+    fgets(message, MAX_MESS_SIZE, stdin);
     fflush(stdin);
-    strcat_s(buff, BUFF_SIZE, message);
+    message[strlen(message) - 1] = '\0';
 
     // Send message
-    int ret = send(client, buff, strlen(buff), 0);
-    if (ret == SOCKET_ERROR)
-    {
-        printf("Error %d: cannot send request.\n", WSAGetLastError());
-    }
+    sendRequestWithDelimiter(client, message);
 }
 
 void sendLogoutRequest(SOCKET client)
@@ -49,11 +77,7 @@ void sendLogoutRequest(SOCKET client)
     char buff[BUFF_SIZE] = "QUIT";
 
     // Send message
-    int ret = send(client, buff, strlen(buff), 0);
-    if (ret == SOCKET_ERROR)
-    {
-        printf("Error %d: cannot send request.\n", WSAGetLastError());
-    }
+    sendRequestWithDelimiter(client, buff);
 }
 
 void handleServerResponse(SOCKET client, char *serverResponse)

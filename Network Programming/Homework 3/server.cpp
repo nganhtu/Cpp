@@ -7,6 +7,7 @@
 #include <time.h>
 #define SERVER_ADDR "127.0.0.1"
 #define BUFF_SIZE 2048
+#define DELIMITER "\r\n"
 #pragma comment(lib, "Ws2_32.lib")
 
 typedef struct Session
