@@ -6,10 +6,13 @@ int main()
 {
     char s[1000];
     fgets(s, 1000, stdin);
-    s[strlen(s)] = '\0';
-    strcat_s(s, 1000, "\r\n\0");
-    printf("\"%s\"", s);
+
     printf("%d\n", strlen(s));
+    s[strlen(s) - 1] = '\0';
+    printf("%d\n", strlen(s));
+    strcat_s(s, 1000, "\r\n\0");
+    printf("%d\n", strlen(s));
+    printf("\"%s\"\n", s);
     if (strstr(s, "\r\n") != NULL)
     {
         printf("s has \\r\\n.\n");
