@@ -2,6 +2,15 @@
 
 using namespace std;
 
+bool cmp(pair<int, int> a, pair<int, int> b)
+{
+    if (a.second == b.second)
+    {
+        return a.first > b.first;
+    }
+    return a.second > b.second;
+}
+
 void solve()
 {
     vector<pair<int, int>> arr;
@@ -9,8 +18,7 @@ void solve()
     {
         arr.push_back({a, b});
     }
-    sort(arr.begin(), arr.end(),
-         [](pair<int, int> a, pair<int, int> b) { return a.second > b.second; });
+    sort(arr.begin(), arr.end(), cmp);
 
     for (pair<int, int> p : arr)
     {
