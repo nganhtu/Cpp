@@ -1,10 +1,12 @@
+#include <iostream>
 #include <stdio.h>
+#pragma warning(disable : 4996)
 #include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#define BUFF_SIZE 2048
-#define MAX_MESS_SIZE 204800
+#define BUFF_SIZE 64
+#define MAX_MESS_SIZE 2048
 #define DELIMITER "\r\n"
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -47,8 +49,8 @@ void sendRequestWithDelimiter(SOCKET client, const char *originalMessage)
 void sendLoginRequest(SOCKET client)
 {
     // Create message
-    char buff[BUFF_SIZE] = "", username[BUFF_SIZE] = "";
-    strcat_s(buff, BUFF_SIZE, "USER ");
+    char buff[MAX_MESS_SIZE] = "", username[MAX_MESS_SIZE] = "";
+    strcat_s(buff, MAX_MESS_SIZE, "USER ");
     printf("Enter your username: ");
     scanf("%s", username);
     fflush(stdin);
@@ -62,7 +64,7 @@ void sendPostRequest(SOCKET client)
 {
     // Create message
     char buff[MAX_MESS_SIZE] = "", message[MAX_MESS_SIZE] = "";
-    strcat_s(buff, BUFF_SIZE, "POST ");
+    strcat_s(buff, MAX_MESS_SIZE, "POST ");
     printf("Enter message to post: ");
     fgets(message, MAX_MESS_SIZE, stdin);
     fflush(stdin);
@@ -188,7 +190,6 @@ int main(int argc, char *argv[])
             if (mode < 1 || mode > 3)
             {
                 printf("Error: your mode is %d, not in range [1, 3].\n", mode);
-                fflush(stdin);
             }
         }
         switch (mode)

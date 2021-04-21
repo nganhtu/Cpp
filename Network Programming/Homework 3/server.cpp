@@ -1,4 +1,5 @@
 #include <stdio.h>
+#pragma warning(disable : 4996)
 #include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
@@ -6,8 +7,8 @@
 #include <process.h>
 #include <time.h>
 #define SERVER_ADDR "127.0.0.1"
-#define BUFF_SIZE 2048
-#define MAX_MESS_SIZE 204800
+#define BUFF_SIZE 64
+#define MAX_MESS_SIZE 2048
 #define DELIMITER "\r\n"
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -123,13 +124,13 @@ unsigned __stdcall handleRequestThread(void *param)
         mode[4] = 0;
         if (strcmp(mode, "USER") == 0)
         /**
-             * USER request return code:
-             * 
-             * 100: success
-             * 111: logged in already
-             * 112: username doesn't exist
-             * 113: account is being locked
-             */
+         * USER request return code:
+         *
+         * 100: success
+         * 111: logged in already
+         * 112: username doesn't exist
+         * 113: account is being locked
+         */
         {
             if (sess.isLoggedIn)
             {
@@ -194,11 +195,11 @@ unsigned __stdcall handleRequestThread(void *param)
         }
         else if (strcmp(mode, "POST") == 0)
         /**
-             * POST request return code:
-             * 
-             * 200: success
-             * 211: not logged in
-             */
+         * POST request return code:
+         *
+         * 200: success
+         * 211: not logged in
+         */
         {
             if (!sess.isLoggedIn)
             {
@@ -213,11 +214,11 @@ unsigned __stdcall handleRequestThread(void *param)
         }
         else if (strcmp(mode, "QUIT") == 0)
         /**
-             * QUIT request return code:
-             * 
-             * 300: success
-             * 311: not logged in
-             */
+         * QUIT request return code:
+         *
+         * 300: success
+         * 311: not logged in
+         */
         {
             if (!sess.isLoggedIn)
             {
