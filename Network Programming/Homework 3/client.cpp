@@ -10,11 +10,12 @@
 
 void sendRequestWithDelimiter(SOCKET client, const char *originalMessage)
 {
+    // Insert delimiter
     char message[MAX_MESS_SIZE];
     strcpy_s(message, MAX_MESS_SIZE, originalMessage);
     strcat_s(message, MAX_MESS_SIZE, DELIMITER);
 
-    // Send message
+    // Split then send message
     char buff[BUFF_SIZE];
     strcpy_s(buff, BUFF_SIZE, "");
     int cnt = (int)strlen(message) / (BUFF_SIZE - 2), currSplit = 0;
@@ -60,15 +61,16 @@ void sendLoginRequest(SOCKET client)
 void sendPostRequest(SOCKET client)
 {
     // Create message
-    char buff[BUFF_SIZE] = "", message[MAX_MESS_SIZE] = "";
+    char buff[MAX_MESS_SIZE] = "", message[MAX_MESS_SIZE] = "";
     strcat_s(buff, BUFF_SIZE, "POST ");
     printf("Enter message to post: ");
     fgets(message, MAX_MESS_SIZE, stdin);
     fflush(stdin);
     message[strlen(message) - 1] = '\0';
+    strcat_s(buff, MAX_MESS_SIZE, message);
 
     // Send message
-    sendRequestWithDelimiter(client, message);
+    sendRequestWithDelimiter(client, buff);
 }
 
 void sendLogoutRequest(SOCKET client)

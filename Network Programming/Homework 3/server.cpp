@@ -7,6 +7,7 @@
 #include <time.h>
 #define SERVER_ADDR "127.0.0.1"
 #define BUFF_SIZE 2048
+#define MAX_MESS_SIZE 204800
 #define DELIMITER "\r\n"
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -51,7 +52,7 @@ void recordToLog(const char *clientIP, int clientPort, const char *message, cons
 /* handleRequestThread - Thread to receive the request from client and handle */
 unsigned __stdcall handleRequestThread(void *param)
 {
-    char buff[BUFF_SIZE];
+    char buff[BUFF_SIZE], clientRequest[MAX_MESS_SIZE];
     int ret;
 
     // Get clientIP and clientPort from connectedSocket
@@ -75,39 +76,53 @@ unsigned __stdcall handleRequestThread(void *param)
     while (1)
     {
         // Receive message from client
-        ret = recv(sess.connectedSocket, buff, BUFF_SIZE, 0);
-        if (ret == SOCKET_ERROR)
+        strcpy_s(clientRequest, MAX_MESS_SIZE, "");
+        while (1)
         {
-            if (WSAGetLastError() == WSAECONNRESET)
+            ret = recv(sess.connectedSocket, buff, BUFF_SIZE, 0);
+            if (ret == SOCKET_ERROR)
             {
-                printf("Connection [%s:%d] reset by peer.\n", sess.clientIP, sess.clientPort);
-                strcpy_s(sess.username, BUFF_SIZE, "");
-                sess.isLoggedIn = false;
+                if (WSAGetLastError() == WSAECONNRESET)
+                {
+                    printf("Connection [%s:%d] reset by peer.\n", sess.clientIP, sess.clientPort);
+                    strcpy_s(sess.username, BUFF_SIZE, "");
+                    sess.isLoggedIn = false;
+                }
+                else
+                {
+                    printf("Error %d: Cannot receive data.\n", WSAGetLastError());
+                }
+                goto DISCONNECT; // cannot break multiple loops, use goto instead
+            }
+            else if (ret == 0)
+            {
+                printf("Unexpected error.\n");
+                goto DISCONNECT;
             }
             else
             {
-                printf("Error %d: Cannot receive data.\n", WSAGetLastError());
+                buff[ret] = 0;
+                strcat_s(clientRequest, MAX_MESS_SIZE, buff);
+                if (strstr(buff, "\r\n") != NULL)
+                {
+                    break;
+                }
             }
+        }
+        if (clientRequest[strlen(clientRequest) - 2] != '\r')
+        {
+            printf("Receive message unsuccessfully.\n");
             break;
         }
-        else if (ret == 0)
-        {
-            printf("Unexpected error.\n");
-            break;
-        }
-        else
-        {
-            buff[ret] = 0;
-            printf("Receive from client [%s:%d]: %s\n", sess.clientIP, sess.clientPort, buff);
-            char clientRequest[BUFF_SIZE];
-            strcpy_s(clientRequest, BUFF_SIZE, buff);
+        clientRequest[strlen(clientRequest) - 2] = '\0'; // Remove delimiter
+        printf("Receive from client [%s:%d]: %s\n", sess.clientIP, sess.clientPort, clientRequest);
 
-            // Resolve request
-            char mode[5];
-            memcpy_s(mode, 5, &buff[0], 4);
-            mode[4] = 0;
-            if (strcmp(mode, "USER") == 0)
-            /**
+        // Resolve request
+        char mode[5];
+        memcpy_s(mode, 5, &clientRequest[0], 4);
+        mode[4] = 0;
+        if (strcmp(mode, "USER") == 0)
+        /**
              * USER request return code:
              * 
              * 100: success
@@ -115,121 +130,121 @@ unsigned __stdcall handleRequestThread(void *param)
              * 112: username doesn't exist
              * 113: account is being locked
              */
+        {
+            if (sess.isLoggedIn)
             {
-                if (sess.isLoggedIn)
+                strcpy_s(buff, BUFF_SIZE, "111");
+            }
+            else
+            {
+                char inputUsername[MAX_MESS_SIZE] = "";
+                memcpy_s(inputUsername, BUFF_SIZE, &clientRequest[5], strlen(clientRequest) - 5);
+
+                FILE *accPtr = fopen("account.txt", "r");
+                if (accPtr == NULL)
                 {
-                    strcpy_s(buff, BUFF_SIZE, "111");
+                    printf("Cannot open database file. Error code: %d.\n", errno);
+                    break;
                 }
                 else
                 {
-                    char inputUsername[BUFF_SIZE] = "";
-                    memcpy_s(inputUsername, BUFF_SIZE, &buff[5], strlen(buff) - 5);
-
-                    FILE *accPtr = fopen("account.txt", "r");
-                    if (accPtr == NULL)
+                    char accTrack[BUFF_SIZE] = "";
+                    bool accExist = false;
+                    while (fgets(accTrack, BUFF_SIZE, accPtr) != NULL)
                     {
-                        printf("Cannot open database file. Error code: %d.\n", errno);
-                        break;
-                    }
-                    else
-                    {
-                        char accTrack[BUFF_SIZE] = "";
-                        bool accExist = false;
-                        while (fgets(accTrack, BUFF_SIZE, accPtr) != NULL)
+                        int spacePos = 0;
+                        while (spacePos < strlen(accTrack))
                         {
-                            int spacePos = 0;
-                            while (spacePos < strlen(accTrack))
+                            if (accTrack[spacePos] != ' ')
                             {
-                                if (accTrack[spacePos] != ' ')
-                                {
-                                    ++spacePos;
-                                }
-                                else
-                                {
-                                    break;
-                                }
+                                ++spacePos;
                             }
-                            char active, nameTmp[BUFF_SIZE] = "";
-                            memcpy_s(nameTmp, BUFF_SIZE, accTrack, spacePos);
-                            nameTmp[spacePos] = 0;
-                            active = accTrack[spacePos + 1];
-                            if (strcmp(nameTmp, inputUsername) == 0)
+                            else
                             {
-                                accExist = true;
-                                if (active == '1')
-                                {
-                                    strcpy_s(buff, BUFF_SIZE, "113");
-                                }
-                                else if (active == '0')
-                                {
-                                    strcpy_s(buff, BUFF_SIZE, "100");
-                                    sess.isLoggedIn = true;
-                                    strcpy_s(sess.username, BUFF_SIZE, inputUsername);
-                                }
                                 break;
                             }
                         }
-                        if (!sess.isLoggedIn && !accExist)
+                        char active, nameTmp[BUFF_SIZE] = "";
+                        memcpy_s(nameTmp, BUFF_SIZE, accTrack, spacePos);
+                        nameTmp[spacePos] = 0;
+                        active = accTrack[spacePos + 1];
+                        if (strcmp(nameTmp, inputUsername) == 0)
                         {
-                            strcpy_s(buff, BUFF_SIZE, "112");
+                            accExist = true;
+                            if (active == '1')
+                            {
+                                strcpy_s(buff, BUFF_SIZE, "113");
+                            }
+                            else if (active == '0')
+                            {
+                                strcpy_s(buff, BUFF_SIZE, "100");
+                                sess.isLoggedIn = true;
+                                strcpy_s(sess.username, BUFF_SIZE, inputUsername);
+                            }
+                            break;
                         }
                     }
-                    fclose(accPtr);
+                    if (!sess.isLoggedIn && !accExist)
+                    {
+                        strcpy_s(buff, BUFF_SIZE, "112");
+                    }
                 }
+                fclose(accPtr);
             }
-            else if (strcmp(mode, "POST") == 0)
-            /**
+        }
+        else if (strcmp(mode, "POST") == 0)
+        /**
              * POST request return code:
              * 
              * 200: success
              * 211: not logged in
              */
+        {
+            if (!sess.isLoggedIn)
             {
-                if (!sess.isLoggedIn)
-                {
-                    strcpy_s(buff, BUFF_SIZE, "211");
-                }
-                else
-                {
-                    char inputMessage[BUFF_SIZE] = "";
-                    memcpy_s(inputMessage, BUFF_SIZE, &buff[5], strlen(buff) - 5);
-                    strcpy_s(buff, BUFF_SIZE, "200");
-                }
+                strcpy_s(buff, BUFF_SIZE, "211");
             }
-            else if (strcmp(mode, "QUIT") == 0)
-            /**
+            else
+            {
+                char inputMessage[MAX_MESS_SIZE] = "";
+                memcpy_s(inputMessage, BUFF_SIZE, &clientRequest[5], strlen(clientRequest) - 5);
+                strcpy_s(buff, BUFF_SIZE, "200");
+            }
+        }
+        else if (strcmp(mode, "QUIT") == 0)
+        /**
              * QUIT request return code:
              * 
              * 300: success
              * 311: not logged in
              */
+        {
+            if (!sess.isLoggedIn)
             {
-                if (!sess.isLoggedIn)
-                {
-                    strcpy_s(buff, BUFF_SIZE, "311");
-                }
-                else
-                {
-                    strcpy_s(buff, BUFF_SIZE, "300");
-                    strcpy_s(sess.username, BUFF_SIZE, "");
-                    sess.isLoggedIn = false;
-                }
+                strcpy_s(buff, BUFF_SIZE, "311");
             }
             else
             {
-                printf("Unexpected mode.\n");
-                break;
+                strcpy_s(buff, BUFF_SIZE, "300");
+                strcpy_s(sess.username, BUFF_SIZE, "");
+                sess.isLoggedIn = false;
             }
-
-            // Echo to client
-            ret = send(sess.connectedSocket, buff, strlen(buff), 0);
-            if (ret == SOCKET_ERROR)
-            {
-                printf("Error %d: Cannot send data.\n", WSAGetLastError());
-            }
-            recordToLog(sess.clientIP, sess.clientPort, clientRequest, buff);
         }
+        else
+        {
+            printf("Unexpected mode.\n");
+            break;
+        }
+
+        // Echo to client
+        ret = send(sess.connectedSocket, buff, strlen(buff), 0);
+        if (ret == SOCKET_ERROR)
+        {
+            printf("Error %d: Cannot send data.\n", WSAGetLastError());
+        }
+        recordToLog(sess.clientIP, sess.clientPort, clientRequest, buff);
     }
+DISCONNECT:
     printf("Disconnect to client [%s:%d].\n", sess.clientIP, sess.clientPort);
     closesocket(sess.connectedSocket);
     return 0;
