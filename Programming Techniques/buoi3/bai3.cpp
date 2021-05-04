@@ -27,9 +27,22 @@ void TRY(int k)
 {
     for (int i = 2; i <= n; i++)
     {
-        /*****************
-        # YOUR CODE HERE #
-        *****************/
+        if (mark[i] == 0)
+        {
+            mark[i] = 1;
+            x[k] = i;
+            curr += c[x[k - 1]][x[k]];
+            if (k == n)
+            {
+                best = min(best, curr + c[x[k]][x[1]]);
+            }
+            else
+            {
+                TRY(k + 1);
+            }
+            curr -= c[x[k - 1]][x[k]];
+            mark[i] = 0;
+        }
     }
 }
 
