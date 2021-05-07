@@ -75,8 +75,8 @@ int handleRequest(char *response, const char *request, Status *status)
     char res[BUFF_SIZE];
 
     // Resolve request
-    char mode[5];
-    memcpy_s(mode, 5, &request[0], 4);
+    char mode[BUFF_SIZE];
+    memcpy_s(mode, BUFF_SIZE, &request[0], 4);
     mode[4] = 0;
     if (strcmp(mode, "USER") == 0)
     /**
