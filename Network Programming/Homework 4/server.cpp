@@ -64,6 +64,12 @@ void recordToLog(const char *clientIP, int clientPort, const char *message, cons
     fclose(logPtr);
 }
 
+/** Handle client request and generate response code.
+ * @param response pointer to output string that contains response code
+ * @param request pointer to input string that contains client request
+ * @param status pointer to the status of current client
+ * @return 1 if handle successfully; -1 if an error occured.
+ */
 int handleRequest(char *response, const char *request, Status *status)
 {
     char res[BUFF_SIZE];
