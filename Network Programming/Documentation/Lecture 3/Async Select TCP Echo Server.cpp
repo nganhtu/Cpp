@@ -184,9 +184,9 @@ LRESULT CALLBACK windowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 				if (client[i] == 0)
 				{
 					client[i] = connSock;
-					break;
 					//requests Windows message-based notification of network events for listenSock
 					WSAAsyncSelect(client[i], hWnd, WM_SOCKET, FD_READ | FD_CLOSE);
+					break;
 				}
 			if (i == MAX_CLIENT)
 				MessageBox(hWnd, L"Too many clients!", L"Notice", MB_OK);
