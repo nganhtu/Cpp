@@ -6,12 +6,16 @@ using namespace std;
 
 ll solve(ll n)
 {
-    ll arr[3] = {0, 0, 1};
+    ll arr[3] = {0, 0, 1}, sum = 0;
     for (int i = 0; i < n; ++i)
     {
         arr[0] += arr[1];
         arr[1] = arr[2];
         arr[2] = arr[0];
+        if (i > 10)
+        {
+            arr[0] -= solve(n - 10) - solve(n - 11);
+        }
     }
 
     return arr[0] + arr[1] + arr[2];
