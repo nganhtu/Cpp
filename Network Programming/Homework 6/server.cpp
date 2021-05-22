@@ -1,14 +1,20 @@
 // WSAEventSelectServer.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include <stdio.h>
-#include <conio.h>
-#include <WinSock2.h>
-#pragma comment(lib, "Ws2_32.lib")
+#pragma warning(disable : 4996)
+#include <stdlib.h>
+#include <string.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <time.h>
 
-#define PORT 5500
+#define SERVER_ADDR "127.0.0.1"
+#define PORT 6000
 #define BUFF_SIZE 2048
+#define RESPCODELEN 3
+#define DELIMITER "\r\n"
+#pragma comment(lib, "Ws2_32.lib")
 
 int Receive(SOCKET, char *, int, int);
 int Send(SOCKET, char *, int, int);
