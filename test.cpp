@@ -1,14 +1,19 @@
 #include <iostream>
 using namespace std;
-#define pt 6
+int f(int a[], int n)
+{
+    int flag = 1;
+    for (int i = 0; i < n - 1; i++)
+        if (a[i] > a[i + 1])
+        {
+            flag = 0;
+            break;
+        }
+    return flag;
+}
 int main()
 {
-    int a[pt] = {2, -9, 3, -25, 12, 5};
-    int i = 0;
-    while (i < pt)
-    {
-        if (a[i] < 0)
-            cout << a[i] << " ";
-        i++;
-    }
+    int a[] = {-9, -1, 0, 3, 4, 10, 91};
+    cout << f(a, 7);
+    return 0;
 }
