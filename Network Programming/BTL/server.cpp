@@ -37,7 +37,7 @@ void setStatus(Status *status, const char *clientIP, int clientPort)
 
 void recordToLog(const char *clientIP, int clientPort, const char *message, const char *returnCode)
 {
-    FILE *logPtr = fopen("log_20184000.txt", "a");
+    FILE *logPtr = fopen("log.txt", "a");
     if (logPtr == NULL)
     {
         printf("Cannot open log file. Error code: %d\n", errno);
