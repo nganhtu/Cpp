@@ -31,15 +31,56 @@ void sendLoginRequest(SOCKET client)
 void sendPostRequest(SOCKET client)
 {
     // Create message
-    char buff[BUFF_SIZE], message[BUFF_SIZE];
+    char buff[BUFF_SIZE], address[BUFF_SIZE];
     memset(buff, 0, sizeof(buff));
-    memset(message, 0, sizeof(message));
+    memset(address, 0, sizeof(address));
     strcat_s(buff, BUFF_SIZE, "POST ");
-    printf("Enter message to post: ");
+    printf("Enter address to post: ");
     fflush(stdin);
-    fgets(message, BUFF_SIZE, stdin);
-    message[strlen(message) - 1] = '\0';
-    strcat_s(buff, BUFF_SIZE, message);
+    fgets(address, BUFF_SIZE, stdin);
+    address[strlen(address) - 1] = '\0';
+    strcat_s(buff, BUFF_SIZE, address);
+
+    // Send message
+    int ret = send(client, buff, strlen(buff), 0);
+    if (ret == SOCKET_ERROR)
+    {
+        printf("Error %d: cannot send request.\n", WSAGetLastError());
+    }
+}
+
+void sendDeleteRequest(SOCKET client)
+{
+    // Create message
+    char buff[BUFF_SIZE] = "", addrcode[BUFF_SIZE] = "";
+    strcat_s(buff, BUFF_SIZE, "DELE ");
+    printf("Enter address CODE to delete: ");
+    scanf("%s", addrcode);
+    fflush(stdin);
+    strcat_s(buff, BUFF_SIZE, addrcode);
+
+    // Send message
+    int ret = send(client, buff, strlen(buff), 0);
+    if (ret == SOCKET_ERROR)
+    {
+        printf("Error %d: cannot send request.\n", WSAGetLastError());
+    }
+}
+
+void sendShareRequest(SOCKET client)
+{
+    // Create message
+    char buff[BUFF_SIZE] = "", username[BUFF_SIZE] = "", addrcode[BUFF_SIZE] = "";
+    strcat_s(buff, BUFF_SIZE, "SHAR ");
+    printf("Enter friend name to share: ");
+    scanf("%s", username);
+    fflush(stdin);
+    strcat_s(buff, BUFF_SIZE, username);
+    strcat_s(buff, BUFF_SIZE, " ");
+    printf("Enter address CODE to share: ");
+    scanf("%s", addrcode);
+    fflush(stdin);
+    strcat_s(buff, BUFF_SIZE, addrcode);
 
     // Send message
     int ret = send(client, buff, strlen(buff), 0);
@@ -62,7 +103,7 @@ void sendLogoutRequest(SOCKET client)
     }
 }
 
-void handleServerResponse(SOCKET client, char *serverResponse)
+void handleServerResponseCode(SOCKET client, char *serverResponse)
 {
     if (strcmp(serverResponse, "000") == 0)
     {
@@ -103,9 +144,11 @@ void handleServerResponse(SOCKET client, char *serverResponse)
     else
     {
         printf("Unexpected return code from server: \"%s\"\n", serverResponse);
+        /*
         closesocket(client);
         WSACleanup();
         exit(0);
+        */
     }
 }
 
@@ -162,16 +205,16 @@ int main(int argc, char *argv[])
     int ret;
     while (1)
     {
-        printf("Menu:\n1.\tLog in\n2.\tPost \n3.\tLog out\n");
+        printf("Menu:\n1.\tLog in\n2.\tPost\n3.\tDelete\n4.\tShare\n5.\tLog out\n");
         int mode = 0;
-        while (mode < 1 || mode > 3)
+        while (mode < 1 || mode > 5)
         {
             printf("Choose mode: ");
             scanf("%d", &mode);
             fflush(stdin);
-            if (mode < 1 || mode > 3)
+            if (mode < 1 || mode > 5)
             {
-                printf("Error: your mode is %d, not in range [1, 3].\n", mode);
+                printf("Error: your mode is %d, not in range [1, 5].\n", mode);
             }
         }
         switch (mode)
@@ -183,6 +226,12 @@ int main(int argc, char *argv[])
             sendPostRequest(client);
             break;
         case 3:
+            sendDeleteRequest(client);
+            break;
+        case 4:
+            sendShareRequest(client);
+            break;
+        case 5:
             sendLogoutRequest(client);
             break;
         default:
@@ -207,7 +256,7 @@ int main(int argc, char *argv[])
         else
         {
             buff[ret] = 0;
-            handleServerResponse(client, buff);
+            handleServerResponseCode(client, buff);
         }
     }
 

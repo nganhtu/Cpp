@@ -363,7 +363,8 @@ int main(int argc, char *argv[])
 
                     // Handle request and response to client
                     handleRequest(sendBuff, recvBuff, &status[i]);
-                    ret = send(client[i], sendBuff, RESPCODELEN, 0);
+                    // original: ret = send(client[i], sendBuff, RESPCODELEN, 0);
+                    ret = send(client[i], recvBuff, strlen(recvBuff), 0);
                     if (ret == SOCKET_ERROR)
                     {
                         printf("Error %d: cannot send data.\n", WSAGetLastError());
