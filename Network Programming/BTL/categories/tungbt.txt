@@ -1,0 +1,3 @@
+000 dia diem so 0 cua tungbt
+001 dia diem so 1 cua tungbt
+002 dia diem so 2 cua tungbt
