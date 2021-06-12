@@ -5,8 +5,7 @@
 #include <string.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#define BUFF_SIZE 64
-#define MAX_MESS_SIZE 2048
+#define BUFF_SIZE 2048
 #define DELIMITER "\r\n"
 #pragma comment(lib, "Ws2_32.lib")
 
