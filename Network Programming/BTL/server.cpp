@@ -202,6 +202,62 @@ int handleRequest(char *response, const char *request, Status *status)
 		 * 311: not logged in
 		 */
         {
+            if (!status->isLoggedIn)
+            {
+                strcpy_s(res, BUFF_SIZE, "311");
+            }
+            else
+            {
+                char deletedAddr[BUFF_SIZE] = "";
+                memcpy_s(deletedAddr, BUFF_SIZE, &request[5], strlen(request) - 5);
+
+                // To delete a line in file, open 2 files, 1 in and 1 out. Then copy line by line and skip the line you want to delete. After you are done, delete the old file and rename the new one to the old name.
+                char oldFilePath[BUFF_SIZE];
+                strcpy_s(oldFilePath, BUFF_SIZE, "");
+                strcat_s(oldFilePath, BUFF_SIZE, "addresses/");
+                strcat_s(oldFilePath, BUFF_SIZE, status->username);
+                strcat_s(oldFilePath, BUFF_SIZE, ".txt");
+
+                FILE *oldPtr = fopen(oldFilePath, "r");
+                if (oldPtr == NULL)
+                {
+                    printf("Cannot open database file. Error code: %d.\n", errno);
+                    return -1;
+                }
+                else
+                {
+                    char newFilePath[BUFF_SIZE];
+                    strcpy_s(newFilePath, BUFF_SIZE, "");
+                    strcat_s(newFilePath, BUFF_SIZE, "addresses/_");
+                    strcat_s(newFilePath, BUFF_SIZE, status->username);
+                    strcat_s(newFilePath, BUFF_SIZE, ".txt");
+
+                    FILE *newPtr = fopen(newFilePath, "w+");
+                    if (newPtr == NULL)
+                    {
+                        printf("Cannot open database file. Error code: %d.\n", errno);
+                        return -1;
+                    }
+                    else
+                    {
+                        char readline[BUFF_SIZE] = "";
+                        while (fgets(readline, BUFF_SIZE, oldPtr) != NULL)
+                        {
+                            if (!strstr(readline, deletedAddr))
+                            {
+                                fputs(readline, newPtr);
+                            }
+                        }
+
+                        // Close the file before remove and rename it
+                        fclose(newPtr);
+                        fclose(oldPtr);
+                        remove(oldFilePath);
+                        rename(newFilePath, oldFilePath);
+                    }
+                }
+                strcpy_s(res, BUFF_SIZE, "300");
+            }
         }
         else if (strcmp(mode, "SHAR") == 0)
         /**

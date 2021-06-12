@@ -51,12 +51,13 @@ void sendPostRequest(SOCKET client)
 void sendDeleteRequest(SOCKET client)
 {
     // Create message
-    char buff[BUFF_SIZE] = "", addrcode[BUFF_SIZE] = "";
+    char buff[BUFF_SIZE] = "", address[BUFF_SIZE] = "";
     strcat_s(buff, BUFF_SIZE, "DELE ");
     printf("Enter address to delete: ");
-    scanf("%s", addrcode);
     fflush(stdin);
-    strcat_s(buff, BUFF_SIZE, addrcode);
+    fgets(address, BUFF_SIZE, stdin);
+    address[strlen(address) - 1] = '\0';
+    strcat_s(buff, BUFF_SIZE, address);
 
     // Send message
     int ret = send(client, buff, strlen(buff), 0);
@@ -127,11 +128,31 @@ void handleServerResponseCode(SOCKET client, char *serverResponse)
     }
     else if (strcmp(serverResponse, "200") == 0)
     {
-        printf("Post message successfully.\n");
+        printf("Add address successfully.\n");
     }
     else if (strcmp(serverResponse, "211") == 0)
     {
         printf("Error: you are currently not logged in.\n");
+    }
+    else if (strcmp(serverResponse, "300") == 0)
+    {
+        printf("Delete address successfully.\n");
+    }
+    else if (strcmp(serverResponse, "311") == 0)
+    {
+        printf("Error: you are currently not logged in.\n");
+    }
+    else if (strcmp(serverResponse, "400") == 0)
+    {
+        printf("Share address successfully.\n");
+    }
+    else if (strcmp(serverResponse, "411") == 0)
+    {
+        printf("Error: you are currently not logged in.\n");
+    }
+    else if (strcmp(serverResponse, "412") == 0)
+    {
+        printf("Error: username doesn't exist in your friend list.\n");
     }
     else if (strcmp(serverResponse, "500") == 0)
     {
