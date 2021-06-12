@@ -132,11 +132,11 @@ void handleServerResponseCode(SOCKET client, char *serverResponse)
     {
         printf("Error: you are currently not logged in.\n");
     }
-    else if (strcmp(serverResponse, "300") == 0)
+    else if (strcmp(serverResponse, "500") == 0)
     {
         printf("Logout succesfully.\n");
     }
-    else if (strcmp(serverResponse, "311") == 0)
+    else if (strcmp(serverResponse, "511") == 0)
     {
         printf("Error: you are currently not logged in.\n");
     }

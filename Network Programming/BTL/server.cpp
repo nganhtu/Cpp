@@ -179,17 +179,17 @@ int handleRequest(char *response, const char *request, Status *status)
         /**
 			 * QUIT request return code:
 			 *
-			 * 300: success
-			 * 311: not logged in
+			 * 500: success
+			 * 511: not logged in
 			 */
         {
             if (!status->isLoggedIn)
             {
-                strcpy_s(res, BUFF_SIZE, "311");
+                strcpy_s(res, BUFF_SIZE, "511");
             }
             else
             {
-                strcpy_s(res, BUFF_SIZE, "300");
+                strcpy_s(res, BUFF_SIZE, "500");
                 strcpy_s(status->username, BUFF_SIZE, "");
                 status->isLoggedIn = false;
             }
