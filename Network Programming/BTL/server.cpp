@@ -75,7 +75,7 @@ int handleRequest(char *response, const char *request, Status *status)
     char res[BUFF_SIZE];
 
     // Resolve request
-    if (strlen(request) < 4)
+    if (strlen(request) <= RESPCODELEN)
     {
         // return code 000: unexpected request
         strcpy_s(res, BUFF_SIZE, "000");
@@ -87,13 +87,13 @@ int handleRequest(char *response, const char *request, Status *status)
         mode[4] = 0;
         if (strcmp(mode, "USER") == 0)
         /**
-			 * USER request return code:
-			 *
-			 * 100: success
-			 * 111: logged in already
-			 * 112: username doesn't exist
-			 * 113: account is being locked
-			 */
+		 * USER request return code:
+		 *
+		 * 100: success
+		 * 111: logged in already
+		 * 112: username doesn't exist
+		 * 113: account is being locked
+		 */
         {
             if (status->isLoggedIn)
             {
@@ -158,11 +158,11 @@ int handleRequest(char *response, const char *request, Status *status)
         }
         else if (strcmp(mode, "POST") == 0)
         /**
-			 * POST request return code:
-			 *
-			 * 200: success
-			 * 211: not logged in
-			 */
+		 * POST request return code:
+		 *
+		 * 200: success
+		 * 211: not logged in
+		 */
         {
             if (!status->isLoggedIn)
             {
@@ -170,18 +170,55 @@ int handleRequest(char *response, const char *request, Status *status)
             }
             else
             {
-                char inputMessage[BUFF_SIZE] = "";
-                memcpy_s(inputMessage, BUFF_SIZE, &request[5], strlen(request) - 5);
+                char address[BUFF_SIZE] = "";
+                memcpy_s(address, BUFF_SIZE, &request[5], strlen(request) - 5);
+                char filePath[BUFF_SIZE];
+                strcpy_s(filePath, BUFF_SIZE, "");
+                strcat_s(filePath, BUFF_SIZE, "addresses/");
+                strcat_s(filePath, BUFF_SIZE, status->username);
+                strcat_s(filePath, BUFF_SIZE, ".txt");
+
+                FILE *addrPtr = fopen(filePath, "a");
+                if (addrPtr == NULL)
+                {
+                    printf("Cannot open database file. Error code: %d.\n", errno);
+                    return -1;
+                }
+                else
+                {
+                    fputs(address, addrPtr);
+                    fputs("\n", addrPtr);
+                    fclose(addrPtr);
+                }
                 strcpy_s(res, BUFF_SIZE, "200");
             }
         }
+        else if (strcmp(mode, "DELE") == 0)
+        /**
+		 * DELE request return code:
+		 *
+		 * 300: success
+		 * 311: not logged in
+		 */
+        {
+        }
+        else if (strcmp(mode, "SHAR") == 0)
+        /**
+		 * SHAR request return code:
+		 *
+		 * 400: success
+		 * 411: not logged in
+		 * 412: username doesn't exist in friend list
+		 */
+        {
+        }
         else if (strcmp(mode, "QUIT") == 0)
         /**
-			 * QUIT request return code:
-			 *
-			 * 500: success
-			 * 511: not logged in
-			 */
+		 * QUIT request return code:
+		 *
+		 * 500: success
+		 * 511: not logged in
+		 */
         {
             if (!status->isLoggedIn)
             {
@@ -363,8 +400,8 @@ int main(int argc, char *argv[])
 
                     // Handle request and response to client
                     handleRequest(sendBuff, recvBuff, &status[i]);
-                    // original: ret = send(client[i], sendBuff, RESPCODELEN, 0);
-                    ret = send(client[i], recvBuff, strlen(recvBuff), 0);
+                    ret = send(client[i], sendBuff, RESPCODELEN, 0);
+                    // ret = send(client[i], recvBuff, strlen(recvBuff), 0);
                     if (ret == SOCKET_ERROR)
                     {
                         printf("Error %d: cannot send data.\n", WSAGetLastError());
