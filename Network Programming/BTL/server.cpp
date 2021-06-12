@@ -172,6 +172,7 @@ int handleRequest(char *response, const char *request, Status *status)
             {
                 char address[BUFF_SIZE] = "";
                 memcpy_s(address, BUFF_SIZE, &request[5], strlen(request) - 5);
+
                 char filePath[BUFF_SIZE];
                 strcpy_s(filePath, BUFF_SIZE, "");
                 strcat_s(filePath, BUFF_SIZE, "addresses/");
@@ -211,6 +212,90 @@ int handleRequest(char *response, const char *request, Status *status)
 		 * 412: username doesn't exist in friend list
 		 */
         {
+            if (!status->isLoggedIn)
+            {
+                strcpy_s(res, BUFF_SIZE, "411");
+            }
+            else
+            {
+                char usernameAndAddress[BUFF_SIZE] = "";
+                memcpy_s(usernameAndAddress, BUFF_SIZE, &request[5], strlen(request) - 5);
+                int spacePos = 0;
+                while (spacePos < strlen(usernameAndAddress))
+                {
+                    if (usernameAndAddress[spacePos] != ' ')
+                    {
+                        ++spacePos;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                char friendUsername[BUFF_SIZE], sharedAddr[BUFF_SIZE];
+                memcpy_s(friendUsername, BUFF_SIZE, &usernameAndAddress[0], spacePos);
+                friendUsername[spacePos] = 0;
+                memcpy_s(sharedAddr, BUFF_SIZE, &usernameAndAddress[spacePos + 1], strlen(usernameAndAddress) - spacePos + 1);
+                sharedAddr[strlen(usernameAndAddress) - spacePos + 1] = 0;
+
+                // Check if friendUsername is a friend of current user
+                char filePath1[BUFF_SIZE];
+                strcpy_s(filePath1, BUFF_SIZE, "");
+                strcat_s(filePath1, BUFF_SIZE, "friends/");
+                strcat_s(filePath1, BUFF_SIZE, status->username);
+                strcat_s(filePath1, BUFF_SIZE, ".txt");
+
+                FILE *friendPtr = fopen(filePath1, "r");
+                if (friendPtr == NULL)
+                {
+                    printf("Cannot open database file. Error code: %d.\n", errno);
+                    return -1;
+                }
+                else
+                {
+                    char friendTrack[BUFF_SIZE] = "";
+                    bool friendExist = false;
+                    while (fgets(friendTrack, BUFF_SIZE, friendPtr) != NULL)
+                    {
+                        if (strstr(friendTrack, friendUsername))
+                        {
+                            friendExist = true;
+                            break;
+                        }
+                    }
+                    fclose(friendPtr);
+
+                    if (!friendExist)
+                    {
+                        strcpy_s(res, BUFF_SIZE, "412");
+                    }
+                    else
+                    {
+                        char filePath2[BUFF_SIZE];
+                        strcpy_s(filePath2, BUFF_SIZE, "");
+                        strcat_s(filePath2, BUFF_SIZE, "shared/");
+                        strcat_s(filePath2, BUFF_SIZE, friendUsername);
+                        strcat_s(filePath2, BUFF_SIZE, ".txt");
+
+                        FILE *sharedPtr = fopen(filePath2, "a");
+                        if (sharedPtr == NULL)
+                        {
+                            printf("Cannot open database file. Error code: %d.\n", errno);
+                            return -1;
+                        }
+                        else
+                        {
+                            fputs(status->username, sharedPtr);
+                            fputs(" ", sharedPtr);
+                            fputs(sharedAddr, sharedPtr);
+                            fputs("\n", sharedPtr);
+                            fclose(sharedPtr);
+                        }
+
+                        strcpy_s(res, BUFF_SIZE, "400");
+                    }
+                }
+            }
         }
         else if (strcmp(mode, "QUIT") == 0)
         /**

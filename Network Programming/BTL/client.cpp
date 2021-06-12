@@ -69,7 +69,7 @@ void sendDeleteRequest(SOCKET client)
 void sendShareRequest(SOCKET client)
 {
     // Create message
-    char buff[BUFF_SIZE] = "", username[BUFF_SIZE] = "", addrcode[BUFF_SIZE] = "";
+    char buff[BUFF_SIZE] = "", username[BUFF_SIZE] = "", address[BUFF_SIZE] = "";
     strcat_s(buff, BUFF_SIZE, "SHAR ");
     printf("Enter friend name to share: ");
     scanf("%s", username);
@@ -77,9 +77,10 @@ void sendShareRequest(SOCKET client)
     strcat_s(buff, BUFF_SIZE, username);
     strcat_s(buff, BUFF_SIZE, " ");
     printf("Enter address to share: ");
-    scanf("%s", addrcode);
     fflush(stdin);
-    strcat_s(buff, BUFF_SIZE, addrcode);
+    fgets(address, BUFF_SIZE, stdin);
+    address[strlen(address) - 1] = '\0';
+    strcat_s(buff, BUFF_SIZE, address);
 
     // Send message
     int ret = send(client, buff, strlen(buff), 0);
