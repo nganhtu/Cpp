@@ -62,7 +62,7 @@ int main()
         {
             ull mid = (min + max) / 2;
             if (check(k, book, mid))
-            {
+        {
                 max = mid;
             }
             else
