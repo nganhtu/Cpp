@@ -1,6 +1,35 @@
+// 50/100, time limit exceeded
+
 #include <bits/stdc++.h>
 
 using namespace std;
+
+int minCost = 4e8;
+
+void solve(vector<vector<int>> arr, vector<bool> pass, int cnt, int cost, int pos)
+{
+    if (cnt == 0)
+    {
+        if (pos == 1)
+        {
+            minCost = (cost < minCost) ? cost : minCost;
+        }
+        return;
+    }
+    if (cost >= minCost)
+    {
+        return;
+    }
+    for (int i = 0; i < arr.size(); ++i)
+    {
+        if (arr[i][0] == pos && !pass[arr[i][1]])
+        {
+            pass[arr[i][1]] = true;
+            solve(arr, pass, cnt - 1, cost + arr[i][2], arr[i][1]);
+            pass[arr[i][1]] = false;
+        }
+    }
+}
 
 int main()
 {
@@ -10,13 +39,17 @@ int main()
 
     int n, m;
     cin >> n >> m;
-    vector<vector<int>> cost(n, vector<int>(n, -1));
-    for (int uwu = 0; uwu < m; ++uwu)
+    vector<vector<int>> arr(m, vector<int>(3));
+    for (int i = 0; i < m; ++i)
     {
-        int i, j, c;
-        cin >> i >> j >> c;
-        cost[i - 1][j - 1] = c;
+        cin >> arr[i][0] >> arr[i][1] >> arr[i][2];
     }
+
+    sort(arr.begin(), arr.end());
+    vector<bool> pass(n + 1, false);
+    int cnt = n, cost = 0;
+    solve(arr, pass, cnt, cost, 1);
+    cout << minCost;
 
     return 0;
 }
