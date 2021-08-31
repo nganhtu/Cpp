@@ -1,3 +1,2 @@
 *.exe
 vscode-cpptools-cache/
-./*.cpp
