@@ -39,7 +39,7 @@ int main() {
     // Client enters file path
     char clientFilePath[BUFF_SIZE];
     printf("Enter file path: ");
-    gets(clientFilePath);
+    gets_s(clientFilePath, BUFF_SIZE);
     printf("File path is %s\n", clientFilePath);
 
     // Client opens file
