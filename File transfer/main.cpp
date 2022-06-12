@@ -19,7 +19,7 @@ int enterKey();
 int countDigit(int);
 const char *numToStr(int, int);
 int strToNum(const char *);
-const char *sendOpcodeAndLength(int, int);
+const char *createOpcodeAndLength(int, int);
 const char *generateTmpFileName();
 int encode(int, int);
 int decode(int, int);
@@ -33,7 +33,7 @@ int main() {
     int mode = enterMode(), key = enterKey();
 
     // Client sends request to server
-    printf("Cli to ser: %s\n", sendOpcodeAndLength(mode, countDigit(key)));
+    printf("Cli to ser: %s\n", createOpcodeAndLength(mode, countDigit(key)));
     printf("Cli to ser: %s\n", numToStr(key, 0));
 
     // Client enters file path
@@ -62,12 +62,12 @@ int main() {
         memset(buff, 0, BUFF_SIZE);
         int ret = fread(buff, 1, PAYLOAD_SIZE, pCli);
 
-        printf("Cli to ser: %s\n", sendOpcodeAndLength(OPCODE_TRANSFER, ret));
+        printf("Cli to ser: %s\n", createOpcodeAndLength(OPCODE_TRANSFER, ret));
         printf("Cli to ser: blahblah\n");
 
         fwrite(buff, 1, ret, pSer);
     }
-    printf("Cli to ser: %s\n", sendOpcodeAndLength(OPCODE_TRANSFER, 0));
+    printf("Cli to ser: %s\n", createOpcodeAndLength(OPCODE_TRANSFER, 0));
 
     fclose(pCli);
     fclose(pSer);
@@ -86,7 +86,7 @@ int main() {
         memset(buff, 0, BUFF_SIZE);
         int ret = fread(buff, 1, PAYLOAD_SIZE, pSer);
 
-        printf("Ser to cli: %s\n", sendOpcodeAndLength(OPCODE_TRANSFER, ret));
+        printf("Ser to cli: %s\n", createOpcodeAndLength(OPCODE_TRANSFER, ret));
         printf("Ser to cli: stuff of bytes\n");
 
         if (mode == OPCODE_ENCODE) {
@@ -97,7 +97,7 @@ int main() {
 
         fwrite(buff, 1, ret, pCli);
     }
-    printf("Ser to cli: %s\n", sendOpcodeAndLength(OPCODE_TRANSFER, 0));
+    printf("Ser to cli: %s\n", createOpcodeAndLength(OPCODE_TRANSFER, 0));
 
     // Close stuff
     free(buff);
@@ -200,7 +200,7 @@ int strToNum(const char *str) {
     return res;
 }
 
-const char *sendOpcodeAndLength(int opcode, int length) {
+const char *createOpcodeAndLength(int opcode, int length) {
     char *res = (char *)malloc(sizeof(char) * BUFF_SIZE);
     strcpy_s(res, BUFF_SIZE, "");
     strcat_s(res, BUFF_SIZE, numToStr(opcode, OPCODE_SIZE));
