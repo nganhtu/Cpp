@@ -4,10 +4,10 @@
     {
       "type": "shell",
       "label": "cute",
-      "command": "g++" /* C:\\Program%20Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe */,
+      "command": "g++",
       "args": [
         "${file}",
-        "-o" /* writes the build output to an output file */,
+        "-o",
         "${fileDirname}\\${fileBasenameNoExtension}"
       ],
       "options": {
@@ -24,12 +24,12 @@
     {
       "type": "shell",
       "label": "link Winsock Library",
-      "command": "g++" /* C:\\Program%20Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe */,
+      "command": "g++",
       "args": [
         "${file}",
-        "-o" /* writes the build output to an output file */,
+        "-o",
         "${fileDirname}\\${fileBasenameNoExtension}",
-        "-lws2_32" /* #pragma comment(lib, "Ws2_32.lib") ignored by GCC */
+        "-lws2_32"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -45,10 +45,10 @@
     {
       "type": "shell",
       "label": "link GNU Multiple Precision Arithmetic Library",
-      "command": "g++" /* C:\\Program%20Files\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin\\g++.exe */,
+      "command": "g++",
       "args": [
         "${file}",
-        "-o" /* writes the build output to an output file */,
+        "-o",
         "${fileDirname}\\${fileBasenameNoExtension}",
         "-lgmp"
       ],
