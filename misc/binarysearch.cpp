@@ -5,22 +5,23 @@ int key = 19;
 
 int n = sizeof(a) / sizeof(*a);
 
-int binarySearch(int left, int right) {
-    if (left > right) {
-        return -1;
+int binarySearch() {
+    int left = 0, right = n - 1;
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        if (a[mid] > key) {
+            right = mid - 1;
+        } else if (a[mid] < key) {
+            left = mid + 1;
+        } else {
+            return mid;
+        }
     }
-    int mid = (left + right) / 2;
-    if (a[mid] > key) {
-        return binarySearch(left, mid - 1);
-    }
-    if (a[mid] < key) {
-        return binarySearch(mid + 1, right);
-    }
-    return mid;
+    return -1;
 }
 
 int main() {
-    std::cout << binarySearch(0, n - 1);
+    std::cout << binarySearch();
 
     return 0;
 }
