@@ -55,7 +55,31 @@ void mergeSort(int left, int right) {
     }
 }
 
-// there is a thing called heap sort, it requires Heap structure
+void heapify(int asd, int i) {
+    int root = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    if (left < n && a[left] > a[root]) {
+        root = left;
+    }
+    if (right < n && a[right] > a[root]) {
+        root = right;
+    }
+    if (root != i) {
+        std::swap(a[i], a[root]);
+        heapify(n, root);
+    }
+}
+
+void heapSort() {
+    for (int i = n / 2 - 1; i >= 0; --i) {
+        heapify(n, i);
+    }
+    for (int i = n - 1; i >= 0; --i) {
+        std::swap(a[0], a[i]);
+        heapify(i, 0);
+    }
+}
 
 void quickSort(int left, int right) {
     int i = left, j = right;
