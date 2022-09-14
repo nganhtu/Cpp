@@ -55,29 +55,29 @@ void mergeSort(int left, int right) {
     }
 }
 
-void heapify(int asd, int i) {
+void heapify(int i, int end) {
     int root = i;
     int left = 2 * i + 1;
     int right = 2 * i + 2;
-    if (left < n && a[left] > a[root]) {
+    if (left < end && a[left] > a[root]) {
         root = left;
     }
-    if (right < n && a[right] > a[root]) {
+    if (right < end && a[right] > a[root]) {
         root = right;
     }
     if (root != i) {
         std::swap(a[i], a[root]);
-        heapify(n, root);
+        heapify(root, end);
     }
 }
 
 void heapSort() {
     for (int i = n / 2 - 1; i >= 0; --i) {
-        heapify(n, i);
+        heapify(i, n);
     }
     for (int i = n - 1; i >= 0; --i) {
         std::swap(a[0], a[i]);
-        heapify(i, 0);
+        heapify(0, i);
     }
 }
 
@@ -134,7 +134,7 @@ int main() {
         std::cout << i << ", ";
     }
     std::cout << std::endl;
-    quickSort(0, n - 1);
+    heapSort();
     for (int i : a) {
         std::cout << i << ", ";
     }
