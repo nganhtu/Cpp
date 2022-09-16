@@ -70,19 +70,17 @@ void mergeSort(int left, int right) {
     }
 }
 
-void heapify(int i, int end) {
-    int root = i;
-    int left = 2 * i + 1;
-    int right = 2 * i + 2;
-    if (left < end && a[left] > a[root]) {
-        root = left;
+void heapify(int root, int end) {
+    int ptr = root, left = 2 * root + 1, right = 2 * root + 2;
+    if (left < end && a[left] > a[ptr]) {
+        ptr = left;
     }
-    if (right < end && a[right] > a[root]) {
-        root = right;
+    if (right < end && a[right] > a[ptr]) {
+        ptr = right;
     }
-    if (root != i) {
-        std::swap(a[i], a[root]);
-        heapify(root, end);
+    if (ptr != root) {
+        std::swap(a[root], a[ptr]);
+        heapify(ptr, end);
     }
 }
 
@@ -97,50 +95,33 @@ void heapSort() {
 }
 
 void quickSort(int left, int right) {
+    if (left >= right) return;
+    int pivot = a[left + rand() % (right - left + 1)];
     int i = left, j = right;
-    int pivot = a[left + rand() % (right - left)];
     while (i <= j) {
-        while (a[i] < pivot) {
-            i++;
-        }
-        while (a[j] > pivot) {
-            j--;
-        }
+        while (a[i] < pivot) ++i;
+        while (a[j] > pivot) --j;
         if (i <= j) {
-            std::swap(a[i], a[j]);
-            i++;
-            j--;
+            std::swap(a[i++], a[j--]);
         }
     }
-    if (j > left) {
-        quickSort(left, j);
-    }
-    if (i < right) {
-        quickSort(i, right);
-    }
+    quickSort(left, j);
+    quickSort(i, right);
 }
 
 void radixSort() {
-    int BASE = 10;
-    int exp = 1;
-    int max = -1;
-    for (int i : a) {
-        if (max < i) {
-            max = i;
-        }
-    }
+    int BASE = 10, exp = 1, max = INT_MIN;
+    for (int i : a)
+        if (max < i) max = i;
     while (pow(BASE, exp) <= max * BASE) {
         std::vector<std::vector<int>> tmp(BASE, std::vector<int>());
-        for (int i : a) {
+        for (int i : a)
             tmp[i % (int)pow(BASE, exp) / (int)pow(BASE, exp - 1)].push_back(i);
-        }
         int curr = 0;
-        for (std::vector<int> i : tmp) {
-            for (int j : i) {
+        for (std::vector<int> i : tmp)
+            for (int j : i)
                 a[curr++] = j;
-            }
-        }
-        exp++;
+        ++exp;
     }
 }
 
